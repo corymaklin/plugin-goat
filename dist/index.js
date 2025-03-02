@@ -199,15 +199,94 @@ Balance: ${balance} ETH`;
   };
 }
 
+// src/providers/messageState.ts
+var FIELD_GUIDANCE = {
+  originChain: {
+    description: "From chain name (e.g. base, arbitrum)",
+    valid: "base, arbitrum",
+    instructions: "Please provide the origin chain name"
+  }
+  // destinationChain: "To chain name (e.g. base, arbitrum)",
+  // destinationAddress: "Recipient address",
+  // message: "Message content",
+};
+var isDataComplete = (data) => {
+  return Object.keys(data).every((key) => data[key] !== "");
+};
+var messageStateProvider = {
+  get: async (runtime, message, state) => {
+    const cacheKey = "testMessageState";
+    const cachedData = await runtime.cacheManager.get(cacheKey) || {};
+    const knownFields = Object.keys(cachedData).map((key) => `${key}: ${cachedData[key]}`);
+    const missingFields = Object.keys(FIELD_GUIDANCE).filter((key) => !knownFields.includes(key));
+    const missingFieldsPrompt = missingFields.map((key) => FIELD_GUIDANCE[key].instructions).join("\n");
+    let response = "";
+    const prompt = `
+        
+        `;
+    if (missingFields.length > 0) {
+      response += "Missing Information and Extraction Guidelines:\n\n";
+      missingFields.forEach((field) => {
+        const guidance = FIELD_GUIDANCE[field];
+        response += `${field}: ${guidance.description}
+`;
+        response += `Valid values: ${guidance.valid}
+`;
+        response += `Instructions: ${guidance.instructions}
+
+`;
+      });
+      response += "Try to extract all the missing information through natural conversation.\n";
+      response += "Only extract information when clearly and directly stated by the user\n";
+      response += "Verify information is current, not past or future\n";
+    } else {
+      response += "All necessary information has been collected.\n";
+      response += "Continue natural conversation without information gathering.";
+    }
+    return response;
+  }
+};
+var messageState_default = messageStateProvider;
+
+// src/actions/messageEvaluator.ts
+var messageEvaluator = {
+  name: "GET_MESSAGE_DATA",
+  description: "Get message data from the database",
+  similes: [],
+  validate: async (runtime, message, state) => {
+    try {
+      const cacheKey = "testMessageState";
+      const cacheData = await runtime.cacheManager.get(cacheKey);
+      return !isDataComplete(cacheData);
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  },
+  handler: async (runtime, message, state) => {
+    const cacheKey = "testMessageState";
+    const cacheData = await runtime.cacheManager.get(cacheKey);
+    if (isDataComplete(cacheData)) {
+      console.log(`Message data is complete: ${JSON.stringify(cacheData)}`);
+    } else {
+      console.log(`Message data is incomplete: ${JSON.stringify(cacheData)}`);
+    }
+  },
+  examples: []
+};
+
 // src/index.ts
 async function createGoatPlugin(getSetting) {
   const walletClient = getWalletClient(getSetting);
+  if (!walletClient) {
+    throw new Error("Failed to initialize wallet client");
+  }
   const actions = await getOnChainActions(walletClient);
   return {
     name: "[GOAT] Onchain Actions",
     description: "Mode integration plugin",
-    providers: [getWalletProvider(walletClient)],
-    evaluators: [],
+    providers: [getWalletProvider(walletClient), messageState_default],
+    evaluators: [messageEvaluator],
     services: [],
     actions
   };
