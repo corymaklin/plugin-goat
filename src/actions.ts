@@ -24,7 +24,48 @@ export async function getOnChainActions(wallet: WalletClientBase) {
             validate: async () => true,
             examples: [],
         },
-        
+        {
+            name: "SWAP_TOKENS",
+            description: "Swap two different tokens using KIM protocol",
+            similes: [],
+            validate: async () => true,
+            examples: [],
+        },
+        {
+            name: "hyperlane_send_message",
+            description: "Send a message from one chain to another using Hyperlane",
+            similes: [],
+            validate: async () => true,
+            examples: [],
+        },
+        {
+            name: "hyperlane_read_message",
+            description: "Check the status and content of a Hyperlane message using chain name and message ID",
+            similes: [],
+            validate: async () => true,
+            examples: [],
+        },
+        {
+            name: "make_hyperlane_warp",
+            description: "Deploy a Hyperlane Warp bridge between two chains",
+            similes: [],
+            validate: async () => true,
+            examples: [],
+        },
+        {
+            name: "hyperlane_send_test_transfer",
+            description: "Send assets from one chain to another using Hyperlane",
+            similes: [],
+            validate: async () => true,
+            examples: [],
+        },
+        {
+            name: "hyperlane_list_warp_routes",
+            description: "List all available Warp routes",
+            similes: [],
+            validate: async () => true,
+            examples: [],
+        },
         // 1. Add your actions here
     ];
 
