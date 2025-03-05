@@ -13,6 +13,7 @@ import {
     type State,
     composeContext,
 } from "@elizaos/core";
+import { hyperlane } from "@goat-sdk/plugin-hyperlane";
 
 export async function getOnChainActions(wallet: WalletClientBase) {
     const actionsWithoutHandler = [
@@ -23,13 +24,14 @@ export async function getOnChainActions(wallet: WalletClientBase) {
             validate: async () => true,
             examples: [],
         },
+        
         // 1. Add your actions here
     ];
 
     const tools = await getOnChainTools({
         wallet: wallet,
         // 2. Configure the plugins you need to perform those actions
-        plugins: [sendETH(), erc20({ tokens: [USDC, MODE] }), kim()],
+        plugins: [sendETH(), erc20({ tokens: [USDC, MODE] }), kim(), hyperlane()],
     });
 
     // 3. Let GOAT handle all the actions
